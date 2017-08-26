@@ -1,1 +1,4 @@
 node_modules/
+certs/
+camlio.pem
+.DS_Store
