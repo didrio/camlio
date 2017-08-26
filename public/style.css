@@ -1,0 +1,142 @@
+html {
+  overflow: auto;
+}
+
+body {
+  font-family: 'Encode Sans Semi Condensed', sans-serif;
+  overflow: auto;
+}
+
+h1 {
+  margin: 0;
+}
+
+h2 {
+  font-size: 1em;
+}
+
+#warning {
+  position: fixed;
+  width: 50vw;
+  height: 30vh;
+  left: 25vw;
+  top: 300px;
+  background-color: white;
+  border: 1px solid black;
+  font-size: 1.8em;
+  padding: 20px;
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+#wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 70vw;
+  margin: 0 auto;
+}
+
+#header {
+  width: 70vw;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 30px;
+}
+
+#counter {
+  font-size: 3em;
+  font-weight: 800;
+}
+
+#videos {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+#remoteVideoDiv {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 50vw;
+}
+
+#localVideoDiv {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  width: 20vw;
+  height: 100%;
+}
+
+#trackingVideo {
+  max-width: 100%;
+  width: 20vw;
+  height: calc((20vw/4) * 3);
+}
+
+#remoteVideo {
+  max-width: 100%;
+  width: 50vw;
+  height: calc((50vw/4) * 3);
+}
+
+#text-area {
+  width: 20vw;
+  box-sizing: border-box;
+  height: calc(((50vw/4) * 3) - ((20vw/4) * 3) - 70px);
+  font-family: 'Encode Sans Semi Condensed', sans-serif;
+  font-size: 1.4em;
+  outline-style: none;
+}
+
+#submit {
+  width: 20vw;
+  height: 70px;
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+#reroll {
+  width: 20vw;
+  height: 30px;
+  cursor: pointer;
+}
+
+#text-from {
+  width: 70vw;
+  height: 50vh;
+  background-color: #EEEEEE;
+  font-size: 1.4em;
+  padding: 20px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.text-line {
+  margin-bottom: 10px;
+}
+
+.you-text {
+  font-weight: 800;
+  color: blue;
+  min-width: 100px !important;
+}
+
+.them-text {
+  font-weight: 800;
+  color: red;
+  min-width: 100px;
+}
