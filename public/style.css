@@ -5,6 +5,31 @@ html {
 body {
   font-family: 'Encode Sans Semi Condensed', sans-serif;
   overflow: auto;
+  margin: 0;
+}
+
+#landing {
+  height: 85vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  font-size: 2.4em;
+  margin-top: 20vh;
+}
+
+#start-button {
+  display: none;
+  width: 200px;
+  height: 100px;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  font-size: 0.8em;
+}
+
+#main {
+  display: none;
 }
 
 h1 {
@@ -46,7 +71,8 @@ h2 {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 30px;
+  height: 10vh;
+  background-color: #EEEEEE;
 }
 
 #counter {
@@ -114,7 +140,7 @@ h2 {
 
 #text-from {
   width: 70vw;
-  height: 50vh;
+  height: calc(100vh - (((50vw/4) * 3) + 10vh));
   background-color: #EEEEEE;
   font-size: 1.4em;
   padding: 20px;
@@ -123,6 +149,12 @@ h2 {
   flex-direction: column;
   justify-content: flex-start;
   align-items: flex-start;
+  overflow: auto;
+}
+
+em {
+    color: #AAAAAA;
+    margin-bottom: 10px;
 }
 
 .text-line {

@@ -7,6 +7,7 @@ var localStream;
 var pc;
 var remoteStream;
 var turnReady;
+var dataChannel;
 var submitButton = document.getElementById("submit");
 var rerollButton = document.getElementById("reroll");
 var textArea = document.getElementById("text-area");
@@ -19,14 +20,23 @@ var timeout;
 var interval;
 
 rerollButton.addEventListener("click", event => {
-  location.reload();
+  sendMessage('bye');
+  reroll();
 });
 
 submitButton.addEventListener("click", event => {
-  textFrom.innerHTML += "<span class='text-line'><span class='you-text'>You&nbsp;&nbsp;</span>" + textArea.value + "</span>";
-  socket.emit("text", textArea.value);
-  textArea.value = "";
+  if (dataChannel.send) {
+    dataChannel.send(textArea.value);
+    textFrom.innerHTML += "<span class='text-line'><span class='you-text'>You&nbsp;&nbsp;</span>" + textArea.value + "</span>";
+    textArea.value = "";
+    textFrom.scrollTop = textFrom.scrollHeight - textFrom.clientHeight;
+  }
 });
+
+function handleDataMessage(message) {
+  textFrom.innerHTML += "<span class='text-line'><span class='them-text'>Them&nbsp;&nbsp;</span>" + message + "</span>";
+  textFrom.scrollTop = textFrom.scrollHeight - textFrom.clientHeight;
+}
 
 document.addEventListener("keydown", event => {
   if (event.keyCode === 13) {
@@ -95,42 +105,33 @@ var sdpConstraints = {
 
 var socket = io.connect();
 
-socket.emit('create or join');
+gotStream(localStream);
+
+socket.emit("lookForSocket");
+
+textFrom.innerHTML = "<em>Looking for a user...</em>";
 
 socket.on("clientCount", data => {
   onlineUsers.innerHTML = data + " Online Users";
-});
-
-socket.on("textFrom", data => {
-  textFrom.innerHTML += "<span class='text-line'><span class='them-text'>Them&nbsp;&nbsp;</span>" + data + "</span>";
 });
 
 socket.on('created', function() {
   isInitiator = true;
 });
 
-socket.on('join', function (){
-  isChannelReady = true;
-});
-
 socket.on('joined', function() {
   isChannelReady = true;
-});
-
-socket.on("userDisconnected", function() {
-  location.reload();
+  textFrom.innerHTML += "<em>Connected!</em>";
 });
 
 ////////////////////////////////////////////////
 
 function sendMessage(message) {
-  console.log('Client sending message: ', message);
   socket.emit('message', message);
 }
 
 // This client receives a message
 socket.on('message', function(message) {
-  console.log('Client received message:', message);
   if (message === 'got user media') {
     maybeStart();
   } else if (message.type === 'offer') {
@@ -148,8 +149,23 @@ socket.on('message', function(message) {
     });
     pc.addIceCandidate(candidate);
   } else if (message === 'bye' && isStarted) {
-    handleRemoteHangup();
+    reroll();
   }
+});
+
+function reroll() {
+  textFrom.innerHTML = "<em>Looking for a user...</em>";
+  handleRemoteHangup();
+  isChannelReady = false;
+  remoteStream = undefined;
+  turnReady = undefined;
+  socket.emit("lookForSocket");
+  socket.emit("handleNew");
+  gotStream(localStream);
+}
+
+socket.on("setup", () => {
+  maybeStart();
 });
 
 ////////////////////////////////////////////////////
@@ -171,7 +187,9 @@ function gotStream(stream) {
   if (isInitiator) {
     maybeStart();
   }
-  setupTracker();
+  if (!localStream) {
+    setupTracker();
+  }
 }
 
 if (location.hostname !== 'localhost') {
@@ -182,11 +200,9 @@ if (location.hostname !== 'localhost') {
 
 function maybeStart() {
   if (!isStarted && typeof localStream !== 'undefined' && isChannelReady) {
-    console.log('>>>>>> creating peer connection');
     createPeerConnection();
     pc.addStream(localStream);
     isStarted = true;
-    console.log('isInitiator', isInitiator);
     if (isInitiator) {
       doCall();
     }
@@ -205,7 +221,6 @@ function createPeerConnection() {
     pc.onicecandidate = handleIceCandidate;
     pc.onaddstream = handleRemoteStreamAdded;
     pc.onremovestream = handleRemoteStreamRemoved;
-    console.log('Created RTCPeerConnnection');
   } catch (e) {
     console.log('Failed to create PeerConnection, exception: ' + e.message);
     alert('Cannot create RTCPeerConnection object.');
@@ -214,7 +229,6 @@ function createPeerConnection() {
 }
 
 function handleIceCandidate(event) {
-  console.log('icecandidate event: ', event);
   if (event.candidate) {
     sendMessage({
       type: 'candidate',
@@ -222,14 +236,7 @@ function handleIceCandidate(event) {
       id: event.candidate.sdpMid,
       candidate: event.candidate.candidate
     });
-  } else {
-    console.log('End of candidates.');
   }
-}
-
-function handleRemoteStreamAdded(event) {
-  remoteVideo.src = window.URL.createObjectURL(event.stream);
-  remoteStream = event.stream;
 }
 
 function handleCreateOfferError(event) {
@@ -237,10 +244,22 @@ function handleCreateOfferError(event) {
 }
 
 function doCall() {
+  dataChannel = pc.createDataChannel("chat", {
+    reliable: true
+  });
+  dataChannel.onmessage = function(event) {
+    handleDataMessage(event.data);
+  }
   pc.createOffer(setLocalAndSendMessage, handleCreateOfferError);
 }
 
 function doAnswer() {
+  pc.ondatachannel = function(event) {
+    dataChannel = event.channel;
+    dataChannel.onmessage = function(event) {
+      handleDataMessage(event.data);
+    }
+  };
   pc.createAnswer().then(
     setLocalAndSendMessage,
     onCreateSessionDescriptionError
@@ -251,7 +270,6 @@ function setLocalAndSendMessage(sessionDescription) {
   // Set Opus as the preferred codec in SDP if Opus is present.
   //  sessionDescription.sdp = preferOpus(sessionDescription.sdp);
   pc.setLocalDescription(sessionDescription);
-  console.log('setLocalAndSendMessage sending message', sessionDescription);
   sendMessage(sessionDescription);
 }
 
@@ -269,13 +287,11 @@ function requestTurn(turnURL) {
     }
   }
   if (!turnExists) {
-    console.log('Getting TURN server from ', turnURL);
     // No TURN server. Get one from computeengineondemand.appspot.com:
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
       if (xhr.readyState === 4 && xhr.status === 200) {
         var turnServer = JSON.parse(xhr.responseText);
-        console.log('Got TURN server: ', turnServer);
         pcConfig.iceServers.push({
           'url': 'turn:' + turnServer.username + '@' + turnServer.turn,
           'credential': turnServer.password
@@ -289,8 +305,7 @@ function requestTurn(turnURL) {
 }
 
 function handleRemoteStreamAdded(event) {
-  console.log('Remote stream added.');
-  remoteVideo.src = window.URL.createObjectURL(event.stream);
+  remoteVideo.srcObject = event.stream;
   remoteStream = event.stream;
 }
 
@@ -298,22 +313,13 @@ function handleRemoteStreamRemoved(event) {
   console.log('Remote stream removed. Event: ', event);
 }
 
-function hangup() {
-  console.log('Hanging up.');
-  stop();
-  sendMessage('bye');
-}
-
 function handleRemoteHangup() {
-  console.log('Session terminated.');
   stop();
   isInitiator = false;
 }
 
 function stop() {
   isStarted = false;
-  // isAudioMuted = false;
-  // isVideoMuted = false;
   pc.close();
   pc = null;
 }

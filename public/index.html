@@ -15,38 +15,52 @@
 
 <body>
 
-  <div id="warning">
-    Unable to detect your face.<br /><br />
-    You will be redirect away from the site in<br /><br />
-    <span id="counter">10</span>
+  <div id="landing">
+
+    <p>Your camera must be on and your face must be in view</p>
+
+    <video id="landingVideo" autoplay muted></video>
+
+    <p><button id="start-button">Start</button></p>
+
   </div>
 
-  <div id="wrapper">
+  <div id="main">
 
-    <div id="header">
-      <h1>caml.io</h1>
-      <h2 id="online-users"></h2>
-      <button id="reroll">Reroll</button>
+    <div id="warning">
+      Unable to detect your face.<br /><br />
+      You will be redirect away from the site in<br /><br />
+      <span id="counter">10</span>
     </div>
 
-    <div id="videos">
-      <div id="remoteVideoDiv">
-        <video id="remoteVideo" autoplay></video>
-      </div>
-      <div id="localVideoDiv">
-        <video id="trackingVideo" autoplay muted></video>
-        <textarea id="text-area" placeholder="type message"></textarea>
-        <button id="submit">Submit</button>
-      </div>
-    </div>
+    <div id="wrapper">
 
-    <div id="text-from"></div>
+      <div id="header">
+        <h1>caml.io</h1>
+        <h2 id="online-users"></h2>
+        <button id="reroll">Reroll</button>
+      </div>
+
+      <div id="videos">
+        <div id="remoteVideoDiv">
+          <video id="remoteVideo" autoplay></video>
+        </div>
+        <div id="localVideoDiv">
+          <video id="trackingVideo" autoplay muted></video>
+          <textarea id="text-area" placeholder="type message"></textarea>
+          <button id="submit">Submit</button>
+        </div>
+      </div>
+
+      <div id="text-from"></div>
+
+      </div>
 
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
   <script src="./scripts/adapter.js"></script>
-  <script src="./scripts/main.js"></script>
+  <script src="./scripts/landing.js"></script>
 
 </body>
 
