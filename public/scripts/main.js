@@ -29,7 +29,7 @@ rerollButton.addEventListener("click", event => {
 submitButton.addEventListener("click", event => {
   if (dataChannel) {
     dataChannel.send(textArea.value);
-    textFrom.innerHTML += "<span class='text-line'><span class='you-text'>You&nbsp;&nbsp;</span>" + textArea.value + "</span>";
+    textFrom.innerHTML += "<div class='text-line'><span class='you-text'>You&nbsp;&nbsp;</span>" + textArea.value + "</div>";
     textArea.value = "";
     textFrom.scrollTop = textFrom.scrollHeight - textFrom.clientHeight;
   }
@@ -71,7 +71,7 @@ function handleDataMessage(message) {
       interval = setInterval(startCounterInterval, 1000);
     }
   } else {
-    textFrom.innerHTML += "<span class='text-line'><span class='them-text'>Them&nbsp;&nbsp;</span>" + message + "</span>";
+    textFrom.innerHTML += "<div class='text-line'><span class='them-text'>Them&nbsp;&nbsp;</span>" + message + "</div>";
     textFrom.scrollTop = textFrom.scrollHeight - textFrom.clientHeight;
   }
 }
@@ -114,9 +114,10 @@ function stopCounterInterval() {
 }
 
 var pcConfig = {
-  'iceServers': [{
-    'urls': 'stun:stun.l.google.com:19302'
-  }]
+  'iceServers': [
+    {urls: 'stun:stun.l.google.com:19302'},
+    {urls: 'turn:turn.anyfirewall.com:443?transport=tcp[webrtc:webrtc]'}
+  ]
 };
 
 // Set up audio and video regardless of what devices are present.
@@ -133,7 +134,7 @@ var socket = io.connect();
 
 socket.emit("lookForSocket");
 
-textFrom.innerHTML = "<em>Looking for a user...</em>";
+textFrom.innerHTML = "<div class='text-line'><em>Looking for a user...</em></div>";
 
 socket.on("clientCount", data => {
   onlineUsers.innerHTML = data + " Online Users";
@@ -145,7 +146,7 @@ socket.on('created', function() {
 
 socket.on('joined', function() {
   isChannelReady = true;
-  textFrom.innerHTML += "<em>Connected!</em>";
+  textFrom.innerHTML += "<div class='text-line'><em>Connected!</em></div>";
 });
 
 ////////////////////////////////////////////////
@@ -179,7 +180,7 @@ socket.on('message', function(message) {
 
 function reroll() {
   remoteVideo.src = "./loadingscreen.mp4";
-  textFrom.innerHTML = "<em>Looking for a user...</em>";
+  textFrom.innerHTML = "<div class='text-line'><em>Looking for a user...</em></div>";
   handleRemoteHangup();
   isChannelReady = false;
   remoteStream = undefined;
@@ -221,6 +222,7 @@ function maybeStart() {
 
 window.onbeforeunload = function() {
   sendMessage('bye');
+  dataChannel.send("//face--face//");
 };
 
 /////////////////////////////////////////////////////////
@@ -292,7 +294,7 @@ function onCreateSessionDescriptionError(error) {
 function requestTurn(turnURL) {
   var turnExists = false;
   for (var i in pcConfig.iceServers) {
-    if (pcConfig.iceServers[i].url.substr(0, 5) === 'turn:') {
+    if (pcConfig.iceServers[i].urls.substr(0, 5) === 'turn:') {
       turnExists = true;
       turnReady = true;
       break;

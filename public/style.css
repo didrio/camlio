@@ -6,10 +6,13 @@ body {
   font-family: 'Encode Sans Semi Condensed', sans-serif;
   overflow: auto;
   margin: 0;
+  background-color: #21201E;
+  letter-spacing: 1px;
+  color: #FFF
 }
 
 #landing {
-  height: 85vh;
+  height: 75vh;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -34,13 +37,29 @@ body {
 
 h1 {
   margin: 0;
+  color: #FDB511;
 }
 
 h2 {
   font-size: 1em;
+  color: #FFFFFF;
+}
+
+button {
+  border: none;
+  font-weight: 800;
+  color: #FDB511;
+  background-color: #4d4c4a;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+button:hover {
+  background-color: #636261;
 }
 
 #warning {
+  color: black;
   position: fixed;
   width: 50vw;
   height: 30vh;
@@ -66,13 +85,13 @@ h2 {
 }
 
 #header {
-  width: 70vw;
+  width: 100vw;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   height: 10vh;
-  background-color: #EEEEEE;
+  background-color: #21201E;
 }
 
 #counter {
@@ -92,7 +111,7 @@ h2 {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  width: 50vw;
+  width: 60vw;
   background-color: black;
 }
 
@@ -101,50 +120,54 @@ h2 {
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
-  width: 20vw;
+  width: 40vw;
   height: 100%;
 }
 
 #trackingVideo {
   max-width: 100%;
-  width: 20vw;
-  height: calc((20vw/4) * 3);
+  width: 40vw;
+  height: calc((40vw/4) * 3);
 }
 
 #remoteVideo {
   max-width: 100%;
-  width: 50vw;
-  height: calc((50vw/4) * 3);
+  width: 60vw;
+  height: calc((60vw/4) * 3);
 }
 
 #text-area {
-  width: 20vw;
+  width: 40vw;
   box-sizing: border-box;
-  height: calc(((50vw/4) * 3) - ((20vw/4) * 3) - 70px);
+  height: calc(((60vw/4) * 3) - ((40vw/4) * 3) - 70px);
   font-family: 'Encode Sans Semi Condensed', sans-serif;
   font-size: 1.4em;
   outline-style: none;
+  border: none;
+  color: #FFF;
+  padding: 10px;
+  background-color: #797978;
 }
 
 #submit {
-  width: 20vw;
+  width: 40vw;
   height: 70px;
-  box-sizing: border-box;
+  font-size: 1.2em;
   cursor: pointer;
 }
 
 #reroll {
   width: 20vw;
   height: 30px;
+  font-size: 1em;
   cursor: pointer;
 }
 
 #text-from {
-  width: 70vw;
-  height: calc(100vh - (((50vw/4) * 3) + 10vh));
-  background-color: #EEEEEE;
+  width: 100vw;
+  height: calc(100vh - (((60vw/4) * 3) + 11vh));
+  background-color: #21201E;
   font-size: 1.4em;
-  padding: 20px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -153,23 +176,24 @@ h2 {
   overflow: auto;
 }
 
-em {
-    color: #AAAAAA;
-    margin-bottom: 10px;
+.text-line {
+  background-color: #21201E;
+  width: 98vw;
+  padding: 10px 20px;
+  box-sizing: border-box;
+  color: #FFF;
 }
 
-.text-line {
-  margin-bottom: 10px;
+em {
+    color: #AAAAAA;
 }
 
 .you-text {
   font-weight: 800;
-  color: blue;
-  min-width: 100px !important;
+  color: #FDB511;
 }
 
 .them-text {
   font-weight: 800;
-  color: red;
-  min-width: 100px;
+  color: #FFF;
 }
