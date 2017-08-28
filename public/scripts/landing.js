@@ -2,26 +2,28 @@ var startButton = document.getElementById("start-button");
 var landing = document.getElementById("landing");
 var main = document.getElementById("main");
 var body = document.querySelector("body");
+var landingTracker;
+var trackerTask;
 
 navigator.mediaDevices.getUserMedia({
   audio: true,
   video: true
 })
-.then(setupTracker)
+.then(setupLandingTracker)
 .catch(function(e) {
   alert("There was an error getting the stream.");
 });
 
-function setupTracker(stream) {
-  var tracker = new tracking.ObjectTracker('face');
-  tracker.setInitialScale(4);
-  tracker.setStepSize(2);
-  tracker.setEdgesDensity(0.1);
+function setupLandingTracker() {
+  landingTracker = new tracking.ObjectTracker('face');
+  landingTracker.setInitialScale(4);
+  landingTracker.setStepSize(2);
+  landingTracker.setEdgesDensity(0.1);
 
-  tracking.track('#landingVideo', tracker, { camera: true });
+  trackerTask = tracking.track('#landingVideo', landingTracker, { camera: true });
 
-  tracker.on('track', event => {
-    if (event.data.length === 1) {
+  landingTracker.on('track', event => {
+    if (event.data.length > 0) {
       startButton.style.display = "flex";
     } else {
       startButton.style.display = "none";
@@ -30,9 +32,11 @@ function setupTracker(stream) {
 }
 
 startButton.addEventListener("click", function() {
+  trackerTask.stop();
+  trackerTask = null;
+  landingTracker = null;
   body.removeChild(landing);
   main.style.display = "flex";
-  tracker = undefined;
   var newScript = document.createElement("script");
   newScript.setAttribute("src","./scripts/main.js");
   body.appendChild(newScript);

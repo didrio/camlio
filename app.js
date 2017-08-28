@@ -10,7 +10,6 @@ io.on("connection", socket => {
 
   socket.on("lookForSocket", function() {
     socket.emit("clientCount", io.engine.clientsCount);
-    socket.connectedTo = undefined;
     for (s in io.sockets.sockets) {
       const connectedSocket = io.sockets.sockets[s];
       if (!connectedSocket.connectedTo && socket.id !== connectedSocket.id) {
@@ -20,16 +19,18 @@ io.on("connection", socket => {
         io.to(socket.connectedTo).emit("joined");
         io.to(socket.connectedTo).emit("created");
         break;
+      } else {
+        socket.connectedTo = undefined;
       }
     }
   });
 
-    socket.on("handleNew", function(){
-      io.to(socket.connectedTo).emit("setup");
-    });
+  socket.on("handleNew", function() {
+    io.to(socket.connectedTo).emit("setup");
+  });
 
-    socket.on('message', function(message) {
-      socket.broadcast.to(socket.connectedTo).emit('message', message);
-    });
+  socket.on('message', function(message) {
+    socket.broadcast.to(socket.connectedTo).emit('message', message);
+  });
 
 });

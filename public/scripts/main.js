@@ -15,9 +15,11 @@ var textFrom = document.getElementById("text-from");
 var counterElement = document.getElementById("counter");
 var onlineUsers = document.getElementById("online-users");
 var warning = document.getElementById("warning");
+var remoteVideo = document.querySelector('#remoteVideo');
 var counter = 10;
 var timeout;
 var interval;
+var tracker;
 
 rerollButton.addEventListener("click", event => {
   sendMessage('bye');
@@ -25,18 +27,13 @@ rerollButton.addEventListener("click", event => {
 });
 
 submitButton.addEventListener("click", event => {
-  if (dataChannel.send) {
+  if (dataChannel) {
     dataChannel.send(textArea.value);
     textFrom.innerHTML += "<span class='text-line'><span class='you-text'>You&nbsp;&nbsp;</span>" + textArea.value + "</span>";
     textArea.value = "";
     textFrom.scrollTop = textFrom.scrollHeight - textFrom.clientHeight;
   }
 });
-
-function handleDataMessage(message) {
-  textFrom.innerHTML += "<span class='text-line'><span class='them-text'>Them&nbsp;&nbsp;</span>" + message + "</span>";
-  textFrom.scrollTop = textFrom.scrollHeight - textFrom.clientHeight;
-}
 
 document.addEventListener("keydown", event => {
   if (event.keyCode === 13) {
@@ -47,26 +44,53 @@ document.addEventListener("keydown", event => {
   }
 });
 
+navigator.mediaDevices.getUserMedia({
+  audio: true,
+  video: true
+})
+.then(stream => {
+  localStream = stream;
+  gotStream(localStream);
+  document.querySelector("#trackingVideo").srcObject = stream;
+})
+.catch(function(e) {
+  alert("There was an error getting the stream.");
+});
+
+function handleDataMessage(message) {
+  if (message === "//face--face//") {
+    if (timeout) {
+      clearTimeout(timeout);
+      timeout = undefined;
+      clearInterval(interval);
+      stopCounterInterval();
+    }
+  } else if (message === "//noface--noface//") {
+    if (!timeout) {
+      timeout = setTimeout(noFace, 11000);
+      interval = setInterval(startCounterInterval, 1000);
+    }
+  } else {
+    textFrom.innerHTML += "<span class='text-line'><span class='them-text'>Them&nbsp;&nbsp;</span>" + message + "</span>";
+    textFrom.scrollTop = textFrom.scrollHeight - textFrom.clientHeight;
+  }
+}
+
 function setupTracker() {
-  var tracker = new tracking.ObjectTracker('face');
+  tracker = null;
+  tracker = new tracking.ObjectTracker('face');
   tracker.setInitialScale(4);
   tracker.setStepSize(2);
   tracker.setEdgesDensity(0.1);
 
-  tracking.track('#trackingVideo', tracker, { camera: true });
+  tracking.track("#remoteVideo", tracker, { camera: true });
 
   tracker.on('track', event => {
-    if (event.data.length === 1) {
-      if (timeout) {
-        clearTimeout(timeout);
-        timeout = undefined;
-        clearInterval(interval);
-        stopCounterInterval();
-      }
-    } else {
-      if (!timeout) {
-        timeout = setTimeout(noFace, 11000);
-        interval = setInterval(startCounterInterval, 1000);
+    if (dataChannel) {
+      if (event.data.length > 0) {
+        dataChannel.send("//face--face//");
+      } else {
+        dataChannel.send("//noface--noface//");
       }
     }
   });
@@ -105,7 +129,7 @@ var sdpConstraints = {
 
 var socket = io.connect();
 
-gotStream(localStream);
+// gotStream(localStream);
 
 socket.emit("lookForSocket");
 
@@ -154,6 +178,7 @@ socket.on('message', function(message) {
 });
 
 function reroll() {
+  remoteVideo.src = "./loadingscreen.mp4";
   textFrom.innerHTML = "<em>Looking for a user...</em>";
   handleRemoteHangup();
   isChannelReady = false;
@@ -170,25 +195,10 @@ socket.on("setup", () => {
 
 ////////////////////////////////////////////////////
 
-var remoteVideo = document.querySelector('#remoteVideo');
-
-navigator.mediaDevices.getUserMedia({
-  audio: true,
-  video: true
-})
-.then(gotStream)
-.catch(function(e) {
-  alert("There was an error getting the stream.");
-});
-
 function gotStream(stream) {
-  localStream = stream;
   sendMessage('got user media');
   if (isInitiator) {
     maybeStart();
-  }
-  if (!localStream) {
-    setupTracker();
   }
 }
 
@@ -250,6 +260,7 @@ function doCall() {
   dataChannel.onmessage = function(event) {
     handleDataMessage(event.data);
   }
+  setupTracker();
   pc.createOffer(setLocalAndSendMessage, handleCreateOfferError);
 }
 
@@ -260,6 +271,7 @@ function doAnswer() {
       handleDataMessage(event.data);
     }
   };
+  setupTracker();
   pc.createAnswer().then(
     setLocalAndSendMessage,
     onCreateSessionDescriptionError
@@ -305,6 +317,7 @@ function requestTurn(turnURL) {
 }
 
 function handleRemoteStreamAdded(event) {
+  remoteVideo.src = "";
   remoteVideo.srcObject = event.stream;
   remoteStream = event.stream;
 }

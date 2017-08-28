@@ -93,6 +93,7 @@ h2 {
   justify-content: center;
   align-items: center;
   width: 50vw;
+  background-color: black;
 }
 
 #localVideoDiv {
