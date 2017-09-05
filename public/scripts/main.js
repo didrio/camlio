@@ -1,48 +1,48 @@
-'use strict';
+"use strict";
 
-var socketUrl = "https://caml.io";
-var isChannelReady = false;
-var isInitiator = false;
-var isStarted = false;
-var faceDetected = false;
-var localStream;
-var pc;
-var dataChannel;
-var submitButton = document.getElementById("submit");
-var rerollButton = document.getElementById("reroll");
-var textArea = document.getElementById("text-area");
-var textFrom = document.getElementById("text-from");
-var counterElement = document.getElementById("counter");
-var onlineUsers = document.getElementById("online-users");
-var firstWarning = document.getElementById("first-warning");
-var warning = document.getElementById("warning");
-var remoteVideo = document.querySelector('#remoteVideo');
-var counter = 10;
-var timeout;
-var interval;
-var tracker;
-var socket;
+var socketUrl = "https://caml.io",
+    isChannelReady = false,
+    isInitiator = false,
+    isStarted = false,
+    faceDetected = false,
+    localStream,
+    pc,
+    dataChannel,
+    submitButton = document.getElementById("submit"),
+    rerollButton = document.getElementById("reroll"),
+    textArea = document.getElementById("text-area"),
+    textFrom = document.getElementById("text-from"),
+    counterElement = document.getElementById("counter"),
+    onlineUsers = document.getElementById("online-users"),
+    firstWarning = document.getElementById("first-warning"),
+    warning = document.getElementById("warning"),
+    remoteVideo = document.querySelector("#remoteVideo"),
+    counter = 10,
+    timeout,
+    interval,
+    tracker,
+    socket;
 
 var configuration = { iceServers: [
   {
-    urls: 'turn:numb.viagenie.ca',
-    credential: 'muazkh',
-    username: 'webrtc@live.com'
+    urls: "turn:numb.viagenie.ca",
+    credential: "muazkh",
+    username: "webrtc@live.com"
   },
   {
-    urls: 'turn:turn.anyfirewall.com:443?transport=tcp',
-    credential: 'webrtc',
-    username: 'webrtc'
+    urls: "turn:turn.anyfirewall.com:443?transport=tcp",
+    credential: "webrtc",
+    username: "webrtc"
   },
   {
-    urls: 'turn:192.158.29.39:3478?transport=udp',
-    credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
-    username: '28224511:1379330808'
+    urls: "turn:192.158.29.39:3478?transport=udp",
+    credential: "JZEOEt2V3Qb0y27GRntt2u2PAYA=",
+    username: "28224511:1379330808"
   },
   {
-    urls: 'turn:192.158.29.39:3478?transport=tcp',
-    credential: 'JZEOEt2V3Qb0y27GRntt2u2PAYA=',
-    username: '28224511:1379330808'
+    urls: "turn:192.158.29.39:3478?transport=tcp",
+    credential: "JZEOEt2V3Qb0y27GRntt2u2PAYA=",
+    username: "28224511:1379330808"
   },
   {
     urls: "stun:stun.services.mozilla.com",
@@ -82,17 +82,17 @@ navigator.mediaDevices.getUserMedia({
   document.querySelector("#trackingVideo").srcObject = stream;
   setupTracker();
 })
-.catch(function(e) {
+.catch(error => {
   alert("There was an error getting the stream.");
 });
 
 function startSession() {
   firstWarning.style.display = "none";
-  window.onbeforeunload = function() {
-    sendMessage('bye');
+  window.onbeforeunload = () => {
+    sendMessage("bye");
   };
   rerollButton.addEventListener("click", event => {
-    sendMessage('bye');
+    sendMessage("bye");
     reroll();
   });
   submitButton.addEventListener("click", event => {
@@ -120,14 +120,14 @@ function startSession() {
 
 function setupTracker() {
   tracker = null;
-  tracker = new tracking.ObjectTracker('face');
+  tracker = new tracking.ObjectTracker("face");
   tracker.setInitialScale(4);
   tracker.setStepSize(2);
   tracker.setEdgesDensity(0.1);
 
   tracking.track("#trackingVideo", tracker, { camera: true });
 
-  tracker.on('track', event => {
+  tracker.on("track", event => {
     if (event.data.length > 0) {
       if (!faceDetected) {
         startSession();
@@ -164,7 +164,7 @@ function stopCounterInterval() {
 }
 
 function sendMessage(message) {
-  socket.emit('message', message);
+  socket.emit("message", message);
 }
 
 function handleDataMessage(message) {
@@ -186,14 +186,14 @@ function reroll() {
 }
 
 function gotStream(stream) {
-  sendMessage('got user media');
+  sendMessage("got user media");
   if (isInitiator) {
     maybeStart();
   }
 }
 
 function maybeStart() {
-  if (!isStarted && typeof localStream !== 'undefined' && isChannelReady) {
+  if (!isStarted && typeof localStream !== "undefined" && isChannelReady) {
     createPeerConnection();
     pc.addStream(localStream);
     isStarted = true;
@@ -208,10 +208,10 @@ function createPeerConnection() {
     pc = new RTCPeerConnection(configuration);
     pc.onicecandidate = handleIceCandidate;
     pc.onaddstream = event => { remoteVideo.srcObject = event.stream };
-    pc.onremovestream = event => { console.log('Remote stream removed. Event: ', event) };
+    pc.onremovestream = event => { console.log("Remote stream removed. Event: ", event) };
   } catch (e) {
-    console.log('Failed to create PeerConnection, exception: ' + e.message);
-    alert('Cannot create RTCPeerConnection object.');
+    console.log("Failed to create PeerConnection, exception: " + e.message);
+    alert("Cannot create RTCPeerConnection object.");
     return;
   }
 }
@@ -219,7 +219,7 @@ function createPeerConnection() {
 function handleIceCandidate(event) {
   if (event.candidate) {
     sendMessage({
-      type: 'candidate',
+      type: "candidate",
       label: event.candidate.sdpMLineIndex,
       id: event.candidate.sdpMid,
       candidate: event.candidate.candidate
@@ -231,22 +231,22 @@ function doCall() {
   dataChannel = pc.createDataChannel("chat", {
     reliable: true
   });
-  dataChannel.onmessage = function(event) {
+  dataChannel.onmessage = event => {
     handleDataMessage(event.data);
   }
-  pc.createOffer(setLocalAndSendMessage, event => { console.log('createOffer() error: ', event) });
+  pc.createOffer(setLocalAndSendMessage, event => { console.log("createOffer() error: ", event) });
 }
 
 function doAnswer() {
-  pc.ondatachannel = function(event) {
+  pc.ondatachannel = event => {
     dataChannel = event.channel;
-    dataChannel.onmessage = function(event) {
+    dataChannel.onmessage = event => {
       handleDataMessage(event.data);
     }
   };
   pc.createAnswer().then(
     setLocalAndSendMessage,
-    error => { trace('Failed to create session description: ' + error.toString()) }
+    error => { trace("Failed to create session description: " + error.toString()) }
   );
 }
 
@@ -256,41 +256,35 @@ function setLocalAndSendMessage(sessionDescription) {
 }
 
 function setupSocket() {
-  socket.on("clientCount", data => {
-    onlineUsers.innerHTML = data + " Online Users";
-  });
+  socket.on("clientCount", data => onlineUsers.innerHTML = data + " Online Users");
 
-  socket.on('created', function() {
-    isInitiator = true;
-  });
+  socket.on("created", () => isInitiator = true);
 
-  socket.on('joined', function() {
+  socket.on("joined", () => {
     isChannelReady = true;
     textFrom.innerHTML += "<div class='text-line'><em>Connected!</em></div>";
   });
 
-  socket.on("setup", () => {
-    maybeStart();
-  });
+  socket.on("setup", () => maybeStart());
 
-  socket.on('message', function(message) {
-    if (message === 'got user media') {
+  socket.on("message", message => {
+    if (message === "got user media") {
       maybeStart();
-    } else if (message.type === 'offer') {
+    } else if (message.type === "offer") {
       if (!isInitiator && !isStarted) {
         maybeStart();
       }
       pc.setRemoteDescription(new RTCSessionDescription(message));
       doAnswer();
-    } else if (message.type === 'answer' && isStarted) {
+    } else if (message.type === "answer" && isStarted) {
       pc.setRemoteDescription(new RTCSessionDescription(message));
-    } else if (message.type === 'candidate' && isStarted) {
+    } else if (message.type === "candidate" && isStarted) {
       var candidate = new RTCIceCandidate({
         sdpMLineIndex: message.label,
         candidate: message.candidate
       });
       pc.addIceCandidate(candidate);
-    } else if (message === 'bye' && isStarted) {
+    } else if (message === "bye" && isStarted) {
       reroll();
     }
   });
