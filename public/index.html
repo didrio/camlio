@@ -3,7 +3,7 @@
 
 <head>
 
-  <title>Realtime communication with WebRTC</title>
+  <title>caml.io</title>
 
   <link rel="stylesheet" href="./style.css" />
   <link href="https://fonts.googleapis.com/css?family=Encode+Sans+Semi+Condensed:400,900" rel="stylesheet">
@@ -15,21 +15,16 @@
 
 <body>
 
-  <div id="landing">
-
-    <p>Your camera must be on and your face must be in view</p>
-
-    <video id="landingVideo" autoplay muted></video>
-
-    <p><button id="start-button">Start</button></p>
-
-  </div>
-
   <div id="main">
+
+    <div id="first-warning">
+      Unable to detect your face.<br /><br />
+      Your webcam must be on and your face must be in view.
+    </div>
 
     <div id="warning">
       Unable to detect your face.<br /><br />
-      You will be redirect away from the site in<br /><br />
+      You will be redirected away from the site in<br /><br />
       <span id="counter">10</span>
     </div>
 
@@ -60,7 +55,7 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js"></script>
   <script src="./scripts/adapter.js"></script>
-  <script src="./scripts/landing.js"></script>
+  <script src="./scripts/main.js"></script>
 
 </body>
 
